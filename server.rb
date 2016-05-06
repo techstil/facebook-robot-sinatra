@@ -25,8 +25,8 @@ post '/page_webhook' do
   pp message
   
   # ask Api.ai NLP api if it isn't a confirmation message from Facebook messenger API
-  unless message.nil?
-  if message == "flowers"
+  if message.nil?
+  elsif message == "flowers"
         @result = HTTParty.post(URL, 
         :body => { :recipient => { :id => sender}, 
                    :message => { :text => ApiAi.get_price("buque")}
