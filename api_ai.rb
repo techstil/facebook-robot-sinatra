@@ -72,9 +72,6 @@ module ApiAi
                         }
             
       return top_3_deals_hash
-    else
-      return {:text => "Não encontrei nenhum #{product_name}"}
-    end 
    
   end
   
