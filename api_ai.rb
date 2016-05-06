@@ -38,7 +38,7 @@ module ApiAi
   end
   
   def self.get_price(product)
-        
+    products_elements = []        
     # build hash response containing 3 products
       products_elements << {
                               :title => "Ruusuinen Unelma", 
