@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'json'
 require 'httparty'
-require 'pp'
 require './api_ai'
  
 #Bound to this address so that external hosts can access it, VERY IMPORTANT!
@@ -21,23 +20,26 @@ post '/page_webhook' do
   # get the message text
   message = payload["entry"].first["messaging"].first["message"]
   message = message["text"] unless message.nil?
-  
-  pp message
-  
+    
   # ask Api.ai NLP api if it isn't a confirmation message from Facebook messenger API
-  if message.nil?
-  elsif message == "flowers"
-        @result = HTTParty.post(URL, 
-        :body => { :recipient => { :id => sender}, 
-                   :message => { :text => ApiAi.get_price("buque")}
-                 }.to_json,
-        :headers => { 'Content-Type' => 'application/json' } )
-  else
+  unless message.nil?
+    
+    if message == "flowers"
+      response = ApiAi.get_price("buque")
+    else
+      response = ApiAi.chat(message)
+    end
+    
+    puts "URL token: #{URL}"
+        
+    # post message to facebook messenger API
     @result = HTTParty.post(URL, 
         :body => { :recipient => { :id => sender}, 
-                   :message => ApiAi.chat(message)
+                   :message => response
                  }.to_json,
         :headers => { 'Content-Type' => 'application/json' } )
+        
+        puts @result
   end
   
 end
@@ -45,14 +47,23 @@ end
 get '/page_webhook' do
   params['hub.challenge'] if ENV["VERIFY_TOKEN"] == params['hub.verify_token']
 end
+
+get '/fb_template' do
+  content_type :json
+  ApiAi.get_price(params['product']).to_json
+end
  
 get '/' do
   html = <<-HTML
 <html>
 <body>
-
-Hello robots OverLords!
-
+Hello robots OverLords!<br/>
+<br/>
+Available endpoints:<br/>
+<br/>
+POST /page_webhook<br/>
+GET  /page_webhook<br/>
+GET  <a href="/fb_template?product=flowers">/fb_template?product=flowers</a>
 </body>
 </html>
 HTML
